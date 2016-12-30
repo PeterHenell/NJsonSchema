@@ -951,22 +951,12 @@ namespace NJsonSchema.CodeGeneration.Tests.CSharp
 		""user"": {
             ""type"": ""object"",
             ""required"": [
-                ""id"",
-                ""nick"",
                 ""email""
             ],
             ""properties"": {            
                 ""email"": {
                     ""type"": ""string"",
                     ""description"": ""the unique email address the user used for signing up and signing in""
-                },
-                ""first"": {
-                    ""type"": ""string"",
-                    ""description"": ""first name of the user""
-                },
-                ""last"": {
-                    ""type"": ""string"",
-                    ""description"": ""last name of the user""
                 },
                 ""friends"": {
                     ""type"": ""array"",
@@ -1005,14 +995,14 @@ namespace NJsonSchema.CodeGeneration.Tests.CSharp
 
             //// Act
             var schema = await JsonSchema4.FromJsonAsync(json);
-            var generator = new CSharpGenerator(schema, new CSharpGeneratorSettings { ClassStyle = CSharpClassStyle.Poco });
+            var generator = new CSharpGenerator(schema, new CSharpGeneratorSettings { ClassStyle = CSharpClassStyle.Inpc });
             var code = generator.GenerateFile("Foo");
             Console.WriteLine(code);
             //// Assert
           
             Assert.IsFalse(code.Contains("class Anonymous")); // None of these classes should be Anonymous
             Assert.IsTrue(code.Contains("class HowDoIKnowYou"));
-            Assert.IsTrue(code.Contains("class FooUserFriends"));
+            Assert.IsTrue(code.Contains("class FooUserFriendsItem"));
             Assert.IsTrue(code.Contains("class User"));
             Assert.IsTrue(code.Contains("class Foo"));
 

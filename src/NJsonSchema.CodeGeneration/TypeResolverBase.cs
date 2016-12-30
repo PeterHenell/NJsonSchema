@@ -133,24 +133,20 @@ namespace NJsonSchema.CodeGeneration
             {
                 var iter = schema.ParentSchema;
                 var parentNames = new Stack<string>();
+                var innerName = (iter as JsonProperty)?.Name + "Item" ?? string.Empty;
+                parentNames.Push(ConversionUtilities.ConvertToUpperCamelCase(innerName, true));
                 while (iter != null)
                 {
-                    var innerName = (iter as JsonProperty)?.Name ?? string.Empty;
-                    parentNames.Push(ConversionUtilities.ConvertToUpperCamelCase(innerName, true));
                     if (_generatedTypeNames.ContainsKey(iter))
                     {
                         var name = _generatedTypeNames[iter.ActualSchema];
                         parentNames.Push(name);
-                        
                     }
                     iter = iter.ParentSchema;
                 }
 
                 while (parentNames.Count > 0)
-                {
                     typeNameHint += parentNames.Pop();
-                }
-                
             }
 
             var typeName = GetOrGenerateTypeName(schema, typeNameHint);
