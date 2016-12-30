@@ -935,5 +935,87 @@ namespace NJsonSchema.CodeGeneration.Tests.CSharp
             //// Assert
             Assert.IsTrue(output.Contains("Application_vnd_msExcel = 1,"));
         }
+
+        [TestMethod]
+        public async Task When_nested_object_then_inner_type_name_is_prefixed_from_parent()
+        {
+            var json =
+@"{
+	""type"": ""object"", 
+	""properties"": {
+		""foo"": {
+			""$ref"": ""#/definitions/user""
+		}
+	}, 
+	""definitions"": {
+		""user"": {
+            ""type"": ""object"",
+            ""required"": [
+                ""id"",
+                ""nick"",
+                ""email""
+            ],
+            ""properties"": {            
+                ""email"": {
+                    ""type"": ""string"",
+                    ""description"": ""the unique email address the user used for signing up and signing in""
+                },
+                ""first"": {
+                    ""type"": ""string"",
+                    ""description"": ""first name of the user""
+                },
+                ""last"": {
+                    ""type"": ""string"",
+                    ""description"": ""last name of the user""
+                },
+                ""friends"": {
+                    ""type"": ""array"",
+                    ""items"": {
+                        ""type"": ""object"",
+                        ""required"": [
+                            ""email"",
+                            ""howDoIKnowYou""
+                        ],
+                        ""properties"": {
+                            ""email"": {
+                                ""type"": ""string""
+                            },
+                            ""howDoIKnowYou"": {
+                                ""type"": ""object"",
+                                ""required"": [
+                                    ""metAt"",
+                                    ""when""
+                                ],
+                                ""properties"": {
+                                    ""metAt"": {
+                                        ""type"": ""string""
+                                    },
+                                    ""when"": {
+                                        ""type"": ""string""
+                                    }
+                                }
+                            }
+}
+                    }
+                }
+            }
+        }
+	}
+}";
+
+            //// Act
+            var schema = await JsonSchema4.FromJsonAsync(json);
+            var generator = new CSharpGenerator(schema, new CSharpGeneratorSettings { ClassStyle = CSharpClassStyle.Poco });
+            var code = generator.GenerateFile("Foo");
+            Console.WriteLine(code);
+            //// Assert
+          
+            Assert.IsFalse(code.Contains("class Anonymous")); // None of these classes should be Anonymous
+            Assert.IsTrue(code.Contains("class HowDoIKnowYou"));
+            Assert.IsTrue(code.Contains("class FooUserFriends"));
+            Assert.IsTrue(code.Contains("class User"));
+            Assert.IsTrue(code.Contains("class Foo"));
+
+        }
     }
 }
